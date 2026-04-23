@@ -25,21 +25,21 @@ const digestResponseSchema = z.object({
 
 export type DigestResponse = z.infer<typeof digestResponseSchema>;
 
-const SYSTEM_PROMPT = `Você é um curador de notícias especializado. Seu trabalho é:
-1. Filtrar apenas o que é relevante e novo (não repita o óbvio)
-2. Organizar por importância
-3. Sintetizar em um digest claro e direto
-4. Para cada item, incluir: o que aconteceu, por que importa, e link original
-5. Se houver conflito entre fontes, aponte
+const SYSTEM_PROMPT = `You are a specialized news curator. Your job is:
+1. Filter only what is relevant and new (do not repeat the obvious)
+2. Organize by importance
+3. Synthesize into a clear and direct digest
+4. For each item, include: what happened, why it matters, and original link
+5. If there is conflict between sources, point it out
 
-Você deve responder em JSON com a seguinte estrutura:
+You must respond in JSON with the following structure:
 {
   "urgent": [{ "title": "...", "summary": "...", "whyItMatters": "...", "sourceUrl": "..." }],
   "important": [{ "title": "...", "summary": "...", "whyItMatters": "...", "sourceUrl": "..." }],
-  "context": "background que ajuda a entender (opcional)"
+  "context": "background that helps understand (optional)"
 }
 
-Responda no idioma solicitado. Seja conciso mas completo.`;
+Respond in the requested language. Be concise but complete.`;
 
 export async function synthesizeDigest(params: {
   topic: string;
@@ -47,24 +47,24 @@ export async function synthesizeDigest(params: {
   articles: { title: string; content: string; url: string; publishedAt?: string }[];
   language?: string;
 }): Promise<DigestResponse> {
-  const { topic, description, articles, language = "pt" } = params;
+  const { topic, description, articles, language = "en" } = params;
 
   const articlesText = articles
     .map(
       (a, i) =>
-        `### Artigo ${i + 1}: ${a.title}\nURL: ${a.url}\nPublicado: ${a.publishedAt || "N/A"}\n\n${a.content}`
+        `### Article ${i + 1}: ${a.title}\nURL: ${a.url}\nPublished: ${a.publishedAt || "N/A"}\n\n${a.content}`
     )
     .join("\n\n---\n\n");
 
-  const userPrompt = `Tópico: "${topic}"${
-    description ? `\nDescrição: ${description}` : ""
-  }\nIdioma: ${language === "pt" ? "Português" : "English"}
+  const userPrompt = `Topic: "${topic}"${
+    description ? `\nDescription: ${description}` : ""
+  }\nLanguage: ${language === "pt" ? "Portuguese" : "English"}
 
-Artigos coletados:
+Collected articles:
 ---
 ${articlesText}
 
-Gere o digest em formato JSON.`;
+Generate the digest in JSON format.`;
 
   const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",
@@ -90,21 +90,21 @@ export async function formatDigestAsText(digest: DigestResponse): Promise<string
   let text = "";
 
   if (digest.urgent.length > 0) {
-    text += "## 🔴 Urgente\n\n";
+    text += "## 🔴 Urgent\n\n";
     for (const item of digest.urgent) {
-      text += `**${item.title}**\n${item.summary}\nPor que importa: ${item.whyItMatters}\n[Fonte](${item.sourceUrl})\n\n`;
+      text += `**${item.title}**\n${item.summary}\nWhy it matters: ${item.whyItMatters}\n[Source](${item.sourceUrl})\n\n`;
     }
   }
 
   if (digest.important.length > 0) {
-    text += "## 📌 Importante\n\n";
+    text += "## 📌 Important\n\n";
     for (const item of digest.important) {
-      text += `**${item.title}**\n${item.summary}\nPor que importa: ${item.whyItMatters}\n[Fonte](${item.sourceUrl})\n\n`;
+      text += `**${item.title}**\n${item.summary}\nWhy it matters: ${item.whyItMatters}\n[Source](${item.sourceUrl})\n\n`;
     }
   }
 
   if (digest.context) {
-    text += `## 💡 Contexto\n\n${digest.context}\n`;
+    text += `## 💡 Context\n\n${digest.context}\n`;
   }
 
   return text;
