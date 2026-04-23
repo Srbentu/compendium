@@ -1,0 +1,22 @@
+{
+  "content": [
+    {
+      "title": "JavaScript: New ES2026 Features Announced",
+      "content": "The TC39 committee has officially approved several new features for ES2026, including pattern matching and records/tuples. These additions aim to make JavaScript more expressive and safer for complex data handling.",
+      "url": "https://example.com/js-es2026",
+      "publishedAt": "2026-04-23T08:00:00Z"
+    },
+    {
+      "title": "Node.js 24 Released with Native TypeScript Support",
+      "content": "Node.js 24 ships with built-in TypeScript support, eliminating the need for ts-node or tsx in most projects. The runtime now natively understands .ts files and type annotations.",
+      "url": "https://example.com/node24",
+      "publishedAt": "2026-04-23T06:00:00Z"
+    },
+    {
+      "title": "React 20 Introduces Server Actions by Default",
+      "content": "React 20 makes server components the default, with improved data fetching and caching. The new compiler optimizations reduce bundle sizes by up to 40%.",
+      "url": "https://example.com/react20",
+      "publishedAt": "2026-04-22T14:00:00Z"
+    }
+  ]
+}

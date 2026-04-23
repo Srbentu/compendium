@@ -1,0 +1,32 @@
+This project uses TypeScript in strict mode.
+
+## Key Rules
+
+- All code, comments, and documentation must be in English
+- No `any` types — use `unknown` and narrow
+- Validate all external inputs with Zod schemas
+- Use shadcn/ui components for UI — don't create custom primitives
+- Server Components by default — add "use client" only when needed
+- Follow the project structure defined in AGENTS.md
+
+## Testing
+
+- Unit/integration: Vitest with MSW for API mocking
+- E2E: Playwright
+- Test files go in `__tests__/` directories next to the code they test
+- Mock all external APIs (OpenAI, NewsAPI, etc.)
+
+## Database
+
+- Use Drizzle ORM — no raw SQL
+- Schema changes: `npm run db:generate` then `npm run db:migrate`
+- Use `cuid2` for IDs
+
+## Commit Messages
+
+Use conventional commits:
+- `feat:` new features
+- `fix:` bug fixes
+- `chore:` maintenance
+- `docs:` documentation
+- `test:` tests

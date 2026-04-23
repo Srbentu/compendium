@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>JavaScript Weekly</title>
+    <link>https://javascriptweekly.com</link>
+    <description>A weekly roundup of JavaScript news</description>
+    <item>
+      <title>JavaScript: New ES2026 Features Announced</title>
+      <link>https://example.com/js-es2026</link>
+      <description>The TC39 committee has officially approved several new features for ES2026.</description>
+      <pubDate>Wed, 23 Apr 2026 08:00:00 GMT</pubDate>
+      <dc:creator>John Doe</dc:creator>
+    </item>
+    <item>
+      <title>React 20 Introduces Server Actions by Default</title>
+      <link>https://example.com/react20</link>
+      <description>React 20 makes server components the default, with improved data fetching.</description>
+      <pubDate>Tue, 22 Apr 2026 14:00:00 GMT</pubDate>
+      <dc:creator>Jane Smith</dc:creator>
+    </item>
+  </channel>
+</rss>

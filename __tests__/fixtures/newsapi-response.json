@@ -1,0 +1,26 @@
+{
+  "status": "ok",
+  "totalResults": 3,
+  "articles": [
+    {
+      "source": { "id": null, "name": "TechCrunch" },
+      "author": "John Doe",
+      "title": "JavaScript: New ES2026 Features Announced",
+      "description": "The TC39 committee has officially approved several new features for ES2026.",
+      "url": "https://example.com/js-es2026",
+      "urlToImage": null,
+      "publishedAt": "2026-04-23T08:00:00Z",
+      "content": "The TC39 committee has officially approved several new features for ES2026, including pattern matching and records/tuples."
+    },
+    {
+      "source": { "id": null, "name": "Dev.to" },
+      "author": "Jane Smith",
+      "title": "Node.js 24 Released with Native TypeScript Support",
+      "description": "Node.js 24 ships with built-in TypeScript support.",
+      "url": "https://example.com/node24",
+      "urlToImage": null,
+      "publishedAt": "2026-04-23T06:00:00Z",
+      "content": "Node.js 24 ships with built-in TypeScript support, eliminating the need for ts-node."
+    }
+  ]
+}
