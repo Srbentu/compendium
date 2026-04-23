@@ -1,117 +1,117 @@
 # Compendium
 
-> Agregador de conteúdo inteligente. Escolha os assuntos, a IA cura e sintetiza, e você consome como preferir — texto ou áudio.
+> Intelligent content aggregator. Choose your topics, AI curates and synthesizes, and you consume your way — text or audio.
 
-## O que é
+## What It Is
 
-O Compendium resolve um problema simples: **informação é caos**. Você quer se manter informado sobre JavaScript, geopolítica, ou a saga de livros que está lendo — mas garimpar fontes, filtrar ruído e encontrar tempo pra consumir tudo isso é exaustivo.
+Compendium solves a simple problem: **information is chaos**. You want to stay informed about JavaScript, geopolitics, or the book saga you're reading — but digging through sources, filtering noise, and finding time to consume everything is exhausting.
 
-Com o Compendium, você:
+With Compendium, you:
 
-1. **Escolhe tópicos** — "JavaScript", "Guerra do Irã", "Crônica do Gelo e Fogo"
-2. **Recebe digests curados** — a IA busca fontes relevantes e sintetiza o que importa
-3. **Consome do seu jeito** — texto na web ou áudio/podcast pra ouvir em qualquer lugar
+1. **Choose topics** — "JavaScript", "Iran War", "A Song of Ice and Fire"
+2. **Receive curated digests** — AI finds relevant sources and synthesizes what matters
+3. **Consume your way** — text on the web or audio/podcast to listen anywhere
 
 ## Stack
 
-| Camada   | Tecnologia                                         |
-| -------- | -------------------------------------------------- |
+| Layer | Technology |
+|-------|-----------|
 | Frontend | Next.js 15 (App Router) + Tailwind CSS + shadcn/ui |
-| API      | Next.js API routes + tRPC                          |
-| Banco    | PostgreSQL (Neon) + Drizzle ORM                    |
-| Queue    | BullMQ + Redis (Upstash)                           |
-| AI       | OpenAI GPT-4o-mini                                 |
-| TTS      | OpenAI TTS                                         |
-| Storage  | Cloudflare R2                                      |
-| Auth     | NextAuth.js                                        |
-| Testes   | Vitest + MSW + Playwright                          |
-| Deploy   | Vercel                                             |
+| API | Next.js API routes + tRPC |
+| Database | PostgreSQL (Neon) + Drizzle ORM |
+| Queue | BullMQ + Redis (Upstash) |
+| AI | OpenAI GPT-4o-mini |
+| TTS | OpenAI TTS |
+| Storage | Cloudflare R2 |
+| Auth | NextAuth.js |
+| Testing | Vitest + MSW + Playwright |
+| Deploy | Vercel |
 
-## Primeiros passos
+## Getting Started
 
 ```bash
-# Instalar dependências
+# Install dependencies
 npm install
 
-# Copiar variáveis de ambiente
+# Copy environment variables
 cp .env.example .env.local
 
-# Rodar migrations
+# Run migrations
 npm run db:migrate
 
-# Rodar em desenvolvimento
+# Start development server
 npm run dev
 ```
 
 ## Scripts
 
-| Comando                 | O que faz                         |
-| ----------------------- | --------------------------------- |
-| `npm run dev`           | Servidor de desenvolvimento       |
-| `npm run build`         | Build de produção                 |
-| `npm run start`         | Servidor de produção              |
-| `npm run test`          | Testes unitários + integração     |
-| `npm run test:e2e`      | Testes end-to-end (Playwright)    |
-| `npm run test:coverage` | Cobertura de testes               |
-| `npm run db:generate`   | Gerar migration do Drizzle        |
-| `npm run db:migrate`    | Rodar migrations                  |
-| `npm run db:studio`     | Drizzle Studio (visualizar banco) |
-| `npm run lint`          | ESLint                            |
-| `npm run typecheck`     | Verificação de tipos              |
+| Command | Description |
+|---------|------------|
+| `npm run dev` | Development server |
+| `npm run build` | Production build |
+| `npm run start` | Production server |
+| `npm run test` | Unit + integration tests |
+| `npm run test:e2e` | End-to-end tests (Playwright) |
+| `npm run test:coverage` | Test coverage |
+| `npm run db:generate` | Generate Drizzle migration |
+| `npm run db:migrate` | Run migrations |
+| `npm run db:studio` | Drizzle Studio (visualize database) |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript type checking |
 
-## Estrutura do projeto
+## Project Structure
 
 ```
 src/
-├── app/                    # Rotas Next.js (App Router)
-│   ├── (auth)/             # Páginas de autenticação
-│   ├── (dashboard)/        # Dashboard (autenticado)
+├── app/                    # Next.js routes (App Router)
+│   ├── (auth)/             # Authentication pages
+│   ├── (dashboard)/        # Dashboard (authenticated)
 │   ├── api/                # API routes
-│   └── topic/              # Páginas públicas de tópicos
-├── components/             # Componentes React
-│   ├── ui/                 # Componentes base (shadcn)
+│   └── topic/              # Public topic pages (SEO)
+├── components/             # React components
+│   ├── ui/                 # Base components (shadcn)
 │   ├── layout/             # Layout components
-│   ├── topics/             # Componentes de tópicos
-│   ├── digests/            # Componentes de digests
-│   └── player/             # Player de áudio
-├── lib/                    # Lógica de negócio
+│   ├── topics/             # Topic-related components
+│   ├── digests/            # Digest components
+│   └── player/             # Audio player
+├── lib/                    # Business logic
 │   ├── ai/                 # AI synthesis (OpenAI)
-│   ├── auth/               # Autenticação (NextAuth)
+│   ├── auth/               # Authentication (NextAuth)
 │   ├── db/                 # Schema + queries (Drizzle)
-│   ├── pipeline/           # Pipeline de fontes (RSS, NewsAPI)
+│   ├── pipeline/           # Content pipeline (RSS, NewsAPI)
 │   ├── tts/                # Text-to-speech
-│   ├── delivery/            # Notificações (email, push)
-│   ├── utils/              # Utilitários
-│   └── validations/        # Schemas Zod
-├── hooks/                  # React hooks customizados
-├── config/                 # Configuração da app
-└── types/                  # Tipos TypeScript globais
+│   ├── delivery/           # Notifications (email, push)
+│   ├── utils/              # Utilities
+│   └── validations/        # Zod schemas
+├── hooks/                  # Custom React hooks
+├── config/                 # App configuration
+└── types/                  # Global TypeScript types
 
-e2e/                        # Testes Playwright
-__tests__/                  # Testes + fixtures
+e2e/                        # Playwright E2E tests
+__tests__/                  # Tests + fixtures
 ```
 
-## Variáveis de ambiente
+## Environment Variables
 
-Ver `.env.example` para a lista completa. As principais:
+See `.env.example` for the full list. Key variables:
 
-| Variável               | Descrição                              |
-| ---------------------- | -------------------------------------- |
-| `DATABASE_URL`         | Connection string do PostgreSQL (Neon) |
-| `NEXTAUTH_SECRET`      | Secret para NextAuth                   |
-| `NEXTAUTH_URL`         | URL base da app                        |
-| `OPENAI_API_KEY`       | Chave da API OpenAI                    |
-| `NEWSAPI_KEY`          | Chave da NewsAPI                       |
-| `REDIS_URL`            | URL do Redis (Upstash)                 |
-| `R2_ACCESS_KEY_ID`     | Cloudflare R2 access key               |
-| `R2_SECRET_ACCESS_KEY` | Cloudflare R2 secret key               |
-| `R2_BUCKET`            | Nome do bucket R2                      |
-| `RESEND_API_KEY`       | Chave da API Resend (email)            |
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string (Neon) |
+| `NEXTAUTH_SECRET` | Secret for NextAuth |
+| `NEXTAUTH_URL` | Base URL of the app |
+| `OPENAI_API_KEY` | OpenAI API key |
+| `NEWSAPI_KEY` | NewsAPI key |
+| `REDIS_URL` | Redis URL (Upstash) |
+| `R2_ACCESS_KEY_ID` | Cloudflare R2 access key |
+| `R2_SECRET_ACCESS_KEY` | Cloudflare R2 secret key |
+| `R2_BUCKET` | R2 bucket name |
+| `RESEND_API_KEY` | Resend API key (email) |
 
-## Documentação
+## Documentation
 
-- [Design Doc](./contexto-design-doc.md) — Documento completo de design e arquitetura
+- [Design Doc](./design-doc.md) — Complete design and architecture document
 
-## Licença
+## License
 
 MIT
