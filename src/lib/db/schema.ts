@@ -7,6 +7,8 @@ import {
   boolean,
   integer,
   pgEnum,
+  primaryKey,
+  integer as int,
 } from "drizzle-orm/pg-core";
 
 // --- Enums ---
@@ -27,17 +29,55 @@ export const digestStatusEnum = pgEnum("digest_status", [
   "failed",
 ]);
 
-// --- Tables ---
+// --- Auth.js required tables (v5 compatible) ---
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
-  email: varchar("email", { length: 255 }).notNull().unique(),
-  name: varchar("name", { length: 255 }),
-  image: text("image"),
+  name: text("name"),
+  email: text("email").notNull().unique(),
   emailVerified: timestamp("email_verified", { withTimezone: true }),
+  image: text("image"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const accounts = pgTable("accounts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  type: text("type").notNull(),
+  provider: text("provider").notNull(),
+  providerAccountId: text("provider_account_id").notNull(),
+  refresh_token: text("refresh_token"),
+  access_token: text("access_token"),
+  expires_at: int("expires_at"),
+  token_type: text("token_type"),
+  scope: text("scope"),
+  id_token: text("id_token"),
+  session_state: text("session_state"),
+});
+
+export const sessions = pgTable("sessions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionToken: text("session_token").notNull().unique(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  expires: timestamp("expires", { withTimezone: true }).notNull(),
+});
+
+export const verificationTokens = pgTable(
+  "verification_tokens",
+  {
+    identifier: text("identifier").notNull(),
+    token: text("token").notNull().unique(),
+    expires: timestamp("expires", { withTimezone: true }).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.identifier, t.token] })]
+);
+
+// --- App tables ---
 
 export const topics = pgTable("topics", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -94,38 +134,4 @@ export const digests = pgTable("digests", {
   audioDurationSeconds: integer("audio_duration_seconds"),
   status: digestStatusEnum("status").default("generated").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
-
-// --- NextAuth required tables ---
-
-export const accounts = pgTable("accounts", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  type: varchar("type", { length: 255 }).notNull(),
-  provider: varchar("provider", { length: 255 }).notNull(),
-  providerAccountId: varchar("provider_account_id", { length: 255 }).notNull(),
-  refresh_token: text("refresh_token"),
-  access_token: text("access_token"),
-  expires_at: timestamp("expires_at", { withTimezone: true }),
-  token_type: varchar("token_type", { length: 255 }),
-  scope: varchar("scope", { length: 255 }),
-  id_token: text("id_token"),
-  session_state: varchar("session_state", { length: 255 }),
-});
-
-export const sessions = pgTable("sessions", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  sessionToken: varchar("session_token", { length: 255 }).notNull().unique(),
-  userId: uuid("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  expires: timestamp("expires", { withTimezone: true }).notNull(),
-});
-
-export const verificationTokens = pgTable("verification_tokens", {
-  identifier: varchar("identifier", { length: 255 }).notNull(),
-  token: varchar("token", { length: 255 }).notNull().unique(),
-  expires: timestamp("expires", { withTimezone: true }).notNull(),
 });
