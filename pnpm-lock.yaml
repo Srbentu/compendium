@@ -48,9 +48,6 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
-      '@esbuild/linux-arm64':
-        specifier: ^0.28.0
-        version: 0.28.0
       '@paralleldrive/cuid2':
         specifier: ^3.3.0
         version: 3.3.0
@@ -408,12 +405,6 @@ packages:
 
   '@esbuild/linux-arm64@0.27.7':
     resolution: {integrity: sha512-RZPHBoxXuNnPQO9rvjh5jdkRmVizktkT7TCDkDmQ0W2SwHInKCAV95GRuvdSvA7w4VMwfCjUiPwDi0ZO6Nfe9A==}
-    engines: {node: '>=18'}
-    cpu: [arm64]
-    os: [linux]
-
-  '@esbuild/linux-arm64@0.28.0':
-    resolution: {integrity: sha512-RVyzfb3FWsGA55n6WY0MEIEPURL1FcbhFE6BffZEMEekfCzCIMtB5yyDcFnVbTnwk+CLAgTujmV/Lgvih56W+A==}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [linux]
@@ -3733,8 +3724,6 @@ snapshots:
 
   '@esbuild/linux-arm64@0.27.7':
     optional: true
-
-  '@esbuild/linux-arm64@0.28.0': {}
 
   '@esbuild/linux-arm@0.18.20':
     optional: true

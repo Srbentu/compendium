@@ -1,5 +1,8 @@
-import "dotenv/config";
+import { config } from "dotenv";
 import { defineConfig } from "drizzle-kit";
+
+// Load .env.local for database credentials
+config({ path: ".env.local" });
 
 export default defineConfig({
   schema: "./src/lib/db/schema.ts",
