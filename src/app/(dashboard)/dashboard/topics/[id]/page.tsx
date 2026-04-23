@@ -1,10 +1,31 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getTopicById, deleteTopic, updateTopic } from "@/lib/db/queries";
 import { getTopicSources, addSource, deleteSource } from "@/lib/db/queries";
 import { createSourceSchema } from "@/lib/validations/topic";
-import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { revalidatePath } from "next/cache";
+import { ArrowLeft, Pause, Play, Trash2, X, Rss, Newspaper, MessageCircle, Tv } from "lucide-react";
+
+const sourceIcons: Record<string, React.ReactNode> = {
+  rss: <Rss className="h-4 w-4" />,
+  newsapi: <Newspaper className="h-4 w-4" />,
+  reddit: <MessageCircle className="h-4 w-4" />,
+  youtube: <Tv className="h-4 w-4" />,
+};
 
 interface TopicDetailPageProps {
   params: Promise<{ id: string }>;
@@ -36,9 +57,9 @@ export default async function TopicDetailPage({ params }: TopicDetailPageProps) 
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
-        <div className="container flex h-16 items-center gap-4 px-6">
-          <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ← Back
+        <div className="container flex h-14 items-center gap-4 px-6">
+          <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft className="h-4 w-4" />
           </Link>
           <h1 className="text-lg font-semibold">{topic.title}</h1>
         </div>
@@ -46,176 +67,176 @@ export default async function TopicDetailPage({ params }: TopicDetailPageProps) 
 
       <main className="container mx-auto max-w-3xl px-6 py-8 space-y-8">
         {/* Topic info */}
-        <section className="rounded-lg border p-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-xl font-bold">{topic.title}</h2>
-              {topic.description && (
-                <p className="mt-1 text-muted-foreground">{topic.description}</p>
-              )}
-              <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground">
-                <span>{topic.frequency === "daily" ? "📅 Daily" : "📅 Weekly"}</span>
-                <span>
-                  {topic.formatPref === "text"
-                    ? "📝 Text"
-                    : topic.formatPref === "audio"
-                      ? "🎧 Audio"
-                      : "📝🎧 Both"}
-                </span>
-                <span>{topic.language === "pt" ? "🇧🇷 PT" : topic.language === "de" ? "🇩🇪 DE" : "🇺🇸 EN"}</span>
-                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${topic.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                  {topic.active ? "Active" : "Paused"}
-                </span>
+        <Card>
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle className="text-xl">{topic.title}</CardTitle>
+                {topic.description && (
+                  <CardDescription className="mt-1">{topic.description}</CardDescription>
+                )}
+                <div className="mt-3 flex items-center gap-2">
+                  <Badge variant="outline">
+                    {topic.frequency === "daily" ? "📅 Daily" : "📅 Weekly"}
+                  </Badge>
+                  <Badge variant="outline">
+                    {topic.formatPref === "text"
+                      ? "📝 Text"
+                      : topic.formatPref === "audio"
+                        ? "🎧 Audio"
+                        : "📝🎧 Both"}
+                  </Badge>
+                  <Badge variant="outline">
+                    {topic.language === "pt" ? "🇧🇷 PT" : topic.language === "de" ? "🇩🇪 DE" : "🇺🇸 EN"}
+                  </Badge>
+                  <Badge variant={topic.active ? "default" : "secondary"}>
+                    {topic.active ? "Active" : "Paused"}
+                  </Badge>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Actions */}
-          <div className="mt-4 flex gap-2">
-            <form
-              action={async () => {
-                "use server";
-                await updateTopic(session.user.id, id, { active: !topic.active });
-                revalidatePath(`/dashboard/topics/${id}`);
-              }}
-            >
-              <button
-                type="submit"
-                className="rounded-md border border-input px-3 py-1.5 text-sm shadow-sm hover:bg-accent transition-colors"
+          </CardHeader>
+          <CardContent>
+            <Separator className="mb-4" />
+            <div className="flex gap-2">
+              <form
+                action={async () => {
+                  "use server";
+                  await updateTopic(session.user.id, id, { active: !topic.active });
+                  revalidatePath(`/dashboard/topics/${id}`);
+                }}
               >
-                {topic.active ? "⏸ Pause" : "▶ Resume"}
-              </button>
-            </form>
-            <form
-              action={async () => {
-                "use server";
-                await deleteTopic(session.user.id, id);
-                redirect("/dashboard");
-              }}
-            >
-              <button
-                type="submit"
-                className="rounded-md border border-red-200 px-3 py-1.5 text-sm text-red-600 shadow-sm hover:bg-red-50 transition-colors"
+                <Button variant="outline" size="sm" type="submit">
+                  {topic.active ? (
+                    <><Pause className="mr-1.5 h-3.5 w-3.5" /> Pause</>
+                  ) : (
+                    <><Play className="mr-1.5 h-3.5 w-3.5" /> Resume</>
+                  )}
+                </Button>
+              </form>
+              <form
+                action={async () => {
+                  "use server";
+                  await deleteTopic(session.user.id, id);
+                  redirect("/dashboard");
+                }}
               >
-                🗑 Delete
-              </button>
-            </form>
-          </div>
-        </section>
+                <Button variant="destructive" size="sm" type="submit">
+                  <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
+                </Button>
+              </form>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Sources */}
-        <section>
+        <div>
           <h3 className="text-lg font-semibold mb-4">Sources</h3>
 
           {topicSources.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-8 text-center">
-              <p className="text-muted-foreground">No sources yet. Add an RSS feed, NewsAPI query, or Reddit subreddit below.</p>
-            </div>
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+                <p className="text-muted-foreground text-sm">
+                  No sources yet. Add an RSS feed, NewsAPI query, Reddit subreddit, or YouTube channel below.
+                </p>
+              </CardContent>
+            </Card>
           ) : (
             <div className="space-y-2">
               {topicSources.map((source) => (
-                <div
-                  key={source.id}
-                  className="flex items-center justify-between rounded-lg border p-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="rounded bg-muted px-2 py-0.5 text-xs font-mono uppercase">
-                      {source.type}
-                    </span>
-                    <span className="text-sm truncate max-w-md">{source.url}</span>
-                    {source.label && (
-                      <span className="text-xs text-muted-foreground">({source.label})</span>
-                    )}
-                  </div>
-                  <form
-                    action={async () => {
-                      "use server";
-                      await deleteSource(topic.id, source.id);
-                      revalidatePath(`/dashboard/topics/${id}`);
-                    }}
-                  >
-                    <button
-                      type="submit"
-                      className="text-xs text-muted-foreground hover:text-red-500 transition-colors"
+                <Card key={source.id}>
+                  <CardContent className="flex items-center justify-between py-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-muted-foreground">
+                        {sourceIcons[source.type] ?? source.type}
+                      </span>
+                      <Badge variant="secondary" className="font-mono text-xs uppercase shrink-0">
+                        {source.type}
+                      </Badge>
+                      <span className="text-sm truncate">{source.url}</span>
+                      {source.label && (
+                        <span className="text-xs text-muted-foreground shrink-0">({source.label})</span>
+                      )}
+                    </div>
+                    <form
+                      action={async () => {
+                        "use server";
+                        await deleteSource(topic.id, source.id);
+                        revalidatePath(`/dashboard/topics/${id}`);
+                      }}
                     >
-                      ✕
-                    </button>
-                  </form>
-                </div>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" type="submit">
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}
 
           {/* Add source form */}
-          <form
-            action={async (formData: FormData) => {
-              "use server";
-              const type = formData.get("sourceType") as string;
-              const url = formData.get("sourceUrl") as string;
-              const label = formData.get("sourceLabel") as string;
+          <Card className="mt-4">
+            <CardContent className="pt-6">
+              <form
+                action={async (formData: FormData) => {
+                  "use server";
+                  const type = formData.get("sourceType") as string;
+                  const url = formData.get("sourceUrl") as string;
+                  const label = formData.get("sourceLabel") as string;
 
-              const parsed = createSourceSchema.safeParse({
-                type,
-                url,
-                label: label || undefined,
-              });
+                  const parsed = createSourceSchema.safeParse({
+                    type,
+                    url,
+                    label: label || undefined,
+                  });
 
-              if (parsed.success) {
-                await addSource(topic.id, parsed.data);
-                revalidatePath(`/dashboard/topics/${id}`);
-              }
-            }}
-            className="mt-4 flex items-end gap-3"
-          >
-            <div>
-              <label htmlFor="sourceType" className="block text-xs font-medium mb-1">
-                Type
-              </label>
-              <select
-                id="sourceType"
-                name="sourceType"
-                defaultValue="rss"
-                className="rounded-md border border-input bg-background px-2 py-1.5 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  if (parsed.success) {
+                    await addSource(topic.id, parsed.data);
+                    revalidatePath(`/dashboard/topics/${id}`);
+                  }
+                }}
+                className="flex items-end gap-3"
               >
-                <option value="rss">RSS</option>
-                <option value="newsapi">NewsAPI</option>
-                <option value="reddit">Reddit</option>
-                <option value="youtube">YouTube</option>
-              </select>
-            </div>
-            <div className="flex-1">
-              <label htmlFor="sourceUrl" className="block text-xs font-medium mb-1">
-                URL
-              </label>
-              <input
-                id="sourceUrl"
-                name="sourceUrl"
-                type="url"
-                required
-                placeholder="https://example.com/feed.xml"
-                className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm shadow-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-            <div>
-              <label htmlFor="sourceLabel" className="block text-xs font-medium mb-1">
-                Label
-              </label>
-              <input
-                id="sourceLabel"
-                name="sourceLabel"
-                type="text"
-                placeholder="Optional"
-                className="rounded-md border border-input bg-background px-3 py-1.5 text-sm shadow-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-            <button
-              type="submit"
-              className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
-            >
-              Add
-            </button>
-          </form>
-        </section>
+                <div className="space-y-1.5">
+                  <Label htmlFor="sourceType" className="text-xs">Type</Label>
+                  <Select name="sourceType" defaultValue="rss">
+                    <SelectTrigger id="sourceType" className="w-28">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rss">RSS</SelectItem>
+                      <SelectItem value="newsapi">NewsAPI</SelectItem>
+                      <SelectItem value="reddit">Reddit</SelectItem>
+                      <SelectItem value="youtube">YouTube</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1 space-y-1.5">
+                  <Label htmlFor="sourceUrl" className="text-xs">URL</Label>
+                  <Input
+                    id="sourceUrl"
+                    name="sourceUrl"
+                    type="url"
+                    required
+                    placeholder="https://example.com/feed.xml"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="sourceLabel" className="text-xs">Label</Label>
+                  <Input
+                    id="sourceLabel"
+                    name="sourceLabel"
+                    type="text"
+                    placeholder="Optional"
+                    className="w-28"
+                  />
+                </div>
+                <Button type="submit" size="sm">Add</Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );
