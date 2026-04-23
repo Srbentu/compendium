@@ -1,14 +1,13 @@
 import {
   pgTable,
-  uuid,
   text,
-  varchar,
   timestamp,
   boolean,
   integer,
   pgEnum,
   primaryKey,
-  integer as int,
+  varchar,
+  uuid,
 } from "drizzle-orm/pg-core";
 
 // --- Enums ---
@@ -29,59 +28,73 @@ export const digestStatusEnum = pgEnum("digest_status", [
   "failed",
 ]);
 
-// --- Auth.js required tables (v5 compatible) ---
+// --- Auth.js v5 required tables (compatible with DrizzleAdapter) ---
 
-export const users = pgTable("users", {
-  id: uuid("id").defaultRandom().primaryKey(),
+export const users = pgTable("user", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   name: text("name"),
-  email: text("email").notNull().unique(),
-  emailVerified: timestamp("email_verified", { withTimezone: true }),
+  email: text("email").unique(),
+  emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const accounts = pgTable("accounts", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  type: text("type").notNull(),
-  provider: text("provider").notNull(),
-  providerAccountId: text("provider_account_id").notNull(),
-  refresh_token: text("refresh_token"),
-  access_token: text("access_token"),
-  expires_at: int("expires_at"),
-  token_type: text("token_type"),
-  scope: text("scope"),
-  id_token: text("id_token"),
-  session_state: text("session_state"),
-});
+export const accounts = pgTable(
+  "account",
+  {
+    userId: text("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").notNull(),
+    provider: text("provider").notNull(),
+    providerAccountId: text("providerAccountId").notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type"),
+    scope: text("scope"),
+    id_token: text("id_token"),
+    session_state: text("session_state"),
+  },
+  (account) => ({
+    compositePk: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
+  })
+);
 
-export const sessions = pgTable("sessions", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  sessionToken: text("session_token").notNull().unique(),
-  userId: uuid("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  expires: timestamp("expires", { withTimezone: true }).notNull(),
+export const sessions = pgTable("session", {
+  sessionToken: text("sessionToken").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expires: timestamp("expires", { mode: "date" }).notNull(),
 });
 
 export const verificationTokens = pgTable(
-  "verification_tokens",
+  "verificationToken",
   {
     identifier: text("identifier").notNull(),
-    token: text("token").notNull().unique(),
-    expires: timestamp("expires", { withTimezone: true }).notNull(),
+    token: text("token").notNull(),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
   },
-  (t) => [primaryKey({ columns: [t.identifier, t.token] })]
+  (vt) => ({
+    compositePk: primaryKey({
+      columns: [vt.identifier, vt.token],
+    }),
+  })
 );
 
 // --- App tables ---
 
 export const topics = pgTable("topics", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id")
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("userId")
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   title: varchar("title", { length: 255 }).notNull(),
@@ -96,8 +109,10 @@ export const topics = pgTable("topics", {
 });
 
 export const sources = pgTable("sources", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  topicId: uuid("topic_id")
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  topicId: text("topic_id")
     .references(() => topics.id, { onDelete: "cascade" })
     .notNull(),
   type: sourceTypeEnum("type").notNull(),
@@ -111,8 +126,10 @@ export const sources = pgTable("sources", {
 });
 
 export const rawItems = pgTable("raw_items", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  sourceId: uuid("source_id")
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  sourceId: text("source_id")
     .references(() => sources.id, { onDelete: "cascade" })
     .notNull(),
   url: text("url").notNull(),
@@ -123,8 +140,10 @@ export const rawItems = pgTable("raw_items", {
 });
 
 export const digests = pgTable("digests", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  topicId: uuid("topic_id")
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  topicId: text("topic_id")
     .references(() => topics.id, { onDelete: "cascade" })
     .notNull(),
   periodStart: timestamp("period_start", { withTimezone: true }).notNull(),

@@ -1,18 +1,32 @@
 import { relations } from "drizzle-orm";
 import {
   users,
+  accounts,
+  sessions,
   topics,
   sources,
   rawItems,
   digests,
-  accounts,
-  sessions,
 } from "./schema";
 
 export const usersRelations = relations(users, ({ many }) => ({
-  topics: many(topics),
   accounts: many(accounts),
   sessions: many(sessions),
+  topics: many(topics),
+}));
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+  }),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
 }));
 
 export const topicsRelations = relations(topics, ({ one, many }) => ({
@@ -43,19 +57,5 @@ export const digestsRelations = relations(digests, ({ one }) => ({
   topic: one(topics, {
     fields: [digests.topicId],
     references: [topics.id],
-  }),
-}));
-
-export const accountsRelations = relations(accounts, ({ one }) => ({
-  user: one(users, {
-    fields: [accounts.userId],
-    references: [users.id],
-  }),
-}));
-
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  user: one(users, {
-    fields: [sessions.userId],
-    references: [users.id],
   }),
 }));
