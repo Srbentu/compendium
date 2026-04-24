@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { BookOpen, LogOut, Plus, Settings } from "lucide-react";
+import { SignOutButton } from "@/components/sign-out-button";
 
 export async function DashboardShell({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -55,15 +56,15 @@ export async function DashboardShell({ children }: { children: React.ReactNode }
             </Link>
 
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="rounded-full ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                  <Avatar className="h-8 w-8">
-                    {session.user.image && (
-                      <AvatarImage src={session.user.image} alt={session.user.name ?? ""} />
-                    )}
-                    <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
-                  </Avatar>
-                </button>
+              <DropdownMenuTrigger
+                className="rounded-full ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <Avatar className="h-8 w-8">
+                  {session.user.image && (
+                    <AvatarImage src={session.user.image} alt={session.user.name ?? ""} />
+                  )}
+                  <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
+                </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-2 py-1.5">
@@ -71,26 +72,15 @@ export async function DashboardShell({ children }: { children: React.ReactNode }
                   <p className="text-xs text-muted-foreground">{session.user.email}</p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/settings" className="flex items-center">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </Link>
+                <DropdownMenuItem
+                  render={<Link href="/dashboard/settings" className="flex items-center" />}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <form
-                    action={async () => {
-                      "use server";
-                      const { signOut } = await import("@/lib/auth");
-                      await signOut({ redirectTo: "/login" });
-                    }}
-                  >
-                    <button type="submit" className="flex items-center">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Sign out
-                    </button>
-                  </form>
+                <DropdownMenuItem>
+                  <SignOutButton />
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
