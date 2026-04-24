@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { revalidatePath } from "next/cache";
-import { ArrowLeft, Pause, Play, Trash2, X, Rss, Newspaper, MessageCircle, Tv } from "lucide-react";
+import { ArrowLeft, Pause, Play, Trash2, X, Rss, Newspaper, MessageCircle, Tv, Sparkles, Plus } from "lucide-react";
 
 const sourceIcons: Record<string, React.ReactNode> = {
   rss: <Rss className="h-4 w-4" />,
@@ -53,6 +53,8 @@ export default async function TopicDetailPage({ params }: TopicDetailPageProps) 
   }
 
   const topicSources = await getTopicSources(topic.id);
+  const autoSources = topicSources.filter((s) => s.isAuto);
+  const manualSources = topicSources.filter((s) => !s.isAuto);
 
   return (
     <div className="min-h-screen bg-background">
@@ -129,21 +131,71 @@ export default async function TopicDetailPage({ params }: TopicDetailPageProps) 
           </CardContent>
         </Card>
 
-        {/* Sources */}
+        {/* AI Sources */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">Sources</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">AI Sources</h3>
+            <Badge variant="secondary" className="text-xs">
+              {autoSources.length} found
+            </Badge>
+          </div>
 
-          {topicSources.length === 0 ? (
+          {autoSources.length === 0 ? (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-8 text-center">
-                <p className="text-muted-foreground text-sm">
-                  No sources yet. Add an RSS feed, NewsAPI query, Reddit subreddit, or YouTube channel below.
+                <Sparkles className="h-8 w-8 text-muted-foreground/50 mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  AI is still finding sources, or none were suggested yet.
                 </p>
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-2">
-              {topicSources.map((source) => (
+              {autoSources.map((source) => (
+                <Card key={source.id}>
+                  <CardContent className="flex items-center justify-between py-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-muted-foreground">
+                        {sourceIcons[source.type] ?? source.type}
+                      </span>
+                      <Badge variant="secondary" className="font-mono text-xs uppercase shrink-0">
+                        {source.type}
+                      </Badge>
+                      <span className="text-sm truncate">{source.url}</span>
+                      {source.label && (
+                        <span className="text-xs text-muted-foreground shrink-0">({source.label})</span>
+                      )}
+                    </div>
+                    <form
+                      action={async () => {
+                        "use server";
+                        await deleteSource(topic.id, source.id);
+                        revalidatePath(`/dashboard/topics/${id}`);
+                      }}
+                    >
+                      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" type="submit">
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Manual Sources */}
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Your Sources</h3>
+
+          {manualSources.length === 0 ? (
+            <p className="text-sm text-muted-foreground mb-4">
+              Add extra sources below. The AI sources above are already covering the basics.
+            </p>
+          ) : (
+            <div className="space-y-2 mb-4">
+              {manualSources.map((source) => (
                 <Card key={source.id}>
                   <CardContent className="flex items-center justify-between py-3">
                     <div className="flex items-center gap-3 min-w-0">
@@ -176,8 +228,12 @@ export default async function TopicDetailPage({ params }: TopicDetailPageProps) 
           )}
 
           {/* Add source form */}
-          <Card className="mt-4">
+          <Card>
             <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Plus className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Add a source</span>
+              </div>
               <form
                 action={async (formData: FormData) => {
                   "use server";
@@ -192,7 +248,7 @@ export default async function TopicDetailPage({ params }: TopicDetailPageProps) 
                   });
 
                   if (parsed.success) {
-                    await addSource(topic.id, parsed.data);
+                    await addSource(topic.id, { ...parsed.data, isAuto: false });
                     revalidatePath(`/dashboard/topics/${id}`);
                   }
                 }}

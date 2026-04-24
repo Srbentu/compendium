@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { createTopic } from "@/lib/db/queries";
+import { createTopicWithSources } from "@/actions/create-topic";
 import { ArrowLeft } from "lucide-react";
 
 export default async function NewTopicPage() {
@@ -38,34 +38,11 @@ export default async function NewTopicPage() {
           <CardHeader>
             <CardTitle>Create a Topic</CardTitle>
             <CardDescription>
-              Choose a subject you care about. AI will curate and synthesize content for you.
+              Choose a subject you care about. AI will find the best sources and curate digests for you.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form
-              action={async (formData: FormData) => {
-                "use server";
-                const session = await auth();
-                if (!session?.user?.id) redirect("/login");
-
-                const title = formData.get("title") as string;
-                const description = formData.get("description") as string;
-                const frequency = formData.get("frequency") as string;
-                const formatPref = formData.get("formatPref") as string;
-                const language = formData.get("language") as string;
-
-                const topic = await createTopic(session.user.id, {
-                  title,
-                  description: description || undefined,
-                  frequency: frequency as "daily" | "weekly",
-                  formatPref: formatPref as "text" | "audio" | "both",
-                  language,
-                });
-
-                redirect(`/dashboard/topics/${topic.id}`);
-              }}
-              className="space-y-6"
-            >
+            <form action={createTopicWithSources} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
                 <Input
@@ -85,8 +62,11 @@ export default async function NewTopicPage() {
                   name="description"
                   rows={3}
                   maxLength={1000}
-                  placeholder="What aspects of this topic interest you?"
+                  placeholder="What aspects of this topic interest you? The more detail, the better the AI can find sources."
                 />
+                <p className="text-xs text-muted-foreground">
+                  Adding a description helps the AI pick more relevant sources.
+                </p>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
@@ -136,7 +116,7 @@ export default async function NewTopicPage() {
                 <Link href="/dashboard" className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
                   Cancel
                 </Link>
-                <Button type="submit">Create Topic</Button>
+                <Button type="submit">Create Topic & Find Sources</Button>
               </div>
             </form>
           </CardContent>

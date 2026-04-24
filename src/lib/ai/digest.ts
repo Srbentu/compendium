@@ -1,7 +1,14 @@
-import OpenAI from "openai";
+import { Ollama } from "ollama";
 import { z } from "zod";
 
-const openai = new OpenAI();
+const ollama = new Ollama({
+  host: process.env.OLLAMA_HOST || "http://localhost:11434",
+  headers: process.env.OLLAMA_API_KEY
+    ? { Authorization: `Bearer ${process.env.OLLAMA_API_KEY}` }
+    : undefined,
+});
+
+const MODEL = process.env.OLLAMA_MODEL || "glm-5.1:cloud";
 
 const digestResponseSchema = z.object({
   urgent: z.array(
@@ -32,7 +39,7 @@ const SYSTEM_PROMPT = `You are a specialized news curator. Your job is:
 4. For each item, include: what happened, why it matters, and original link
 5. If there is conflict between sources, point it out
 
-You must respond in JSON with the following structure:
+You must respond in pure JSON with the following structure (no markdown, no code fences):
 {
   "urgent": [{ "title": "...", "summary": "...", "whyItMatters": "...", "sourceUrl": "..." }],
   "important": [{ "title": "...", "summary": "...", "whyItMatters": "...", "sourceUrl": "..." }],
@@ -64,22 +71,21 @@ Collected articles:
 ---
 ${articlesText}
 
-Generate the digest in JSON format.`;
+Generate the digest in pure JSON format.`;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+  const response = await ollama.chat({
+    model: MODEL,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: userPrompt },
     ],
-    response_format: { type: "json_object" },
-    temperature: 0.3,
-    max_tokens: 2000,
+    format: "json",
+    stream: false,
   });
 
-  const content = response.choices[0]?.message?.content;
+  const content = response.message?.content;
   if (!content) {
-    throw new Error("Empty response from OpenAI");
+    throw new Error("Empty response from model");
   }
 
   const parsed = JSON.parse(content);

@@ -1,7 +1,14 @@
-import OpenAI from "openai";
+import { Ollama } from "ollama";
 import { z } from "zod";
 
-const openai = new OpenAI();
+const ollama = new Ollama({
+  host: process.env.OLLAMA_HOST || "http://localhost:11434",
+  headers: process.env.OLLAMA_API_KEY
+    ? { Authorization: `Bearer ${process.env.OLLAMA_API_KEY}` }
+    : undefined,
+});
+
+const MODEL = process.env.OLLAMA_MODEL || "glm-5.1:cloud";
 
 const suggestedSourcesSchema = z.object({
   sources: z.array(
@@ -28,31 +35,30 @@ export async function suggestSourcesForTopic(params: {
 
 Para cada fonte, forneça:
 - type: rss, newsapi, reddit, ou youtube
-- url: URL da fonte
+- url: URL da fonte (deve ser uma URL real e funcional)
 - label: nome legível
 
-Responda em JSON: { "sources": [...] }
+Responda APENAS em JSON válido, sem markdown, sem explicação extra: { "sources": [...] }
 
 Idioma preferido: ${language === "pt" ? "Português" : "English"}`;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+  const response = await ollama.chat({
+    model: MODEL,
     messages: [
       {
         role: "system",
         content:
-          "You are a content curation assistant. You suggest high-quality, reliable sources for any topic. Always respond in JSON format.",
+          "You are a content curation assistant. You suggest high-quality, reliable sources for any topic. Always respond in pure JSON format, no markdown fences.",
       },
       { role: "user", content: prompt },
     ],
-    response_format: { type: "json_object" },
-    temperature: 0.5,
-    max_tokens: 1000,
+    format: "json",
+    stream: false,
   });
 
-  const content = response.choices[0]?.message?.content;
+  const content = response.message?.content;
   if (!content) {
-    throw new Error("Empty response from OpenAI");
+    throw new Error("Empty response from model");
   }
 
   return suggestedSourcesSchema.parse(JSON.parse(content));
