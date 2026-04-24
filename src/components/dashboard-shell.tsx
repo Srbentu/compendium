@@ -1,6 +1,4 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import Link from "next/link";
+import { SignOutButton } from "@/components/sign-out-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -9,10 +7,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BookOpen, LogOut, Plus, Settings } from "lucide-react";
-import { SignOutButton } from "@/components/sign-out-button";
+import { auth } from "@/lib/auth";
+import { BookOpen, Plus, Settings } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export async function DashboardShell({ children }: { children: React.ReactNode }) {
+export async function DashboardShell({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const session = await auth();
   if (!session?.user?.id) {
     redirect("/login");
@@ -25,14 +29,17 @@ export async function DashboardShell({ children }: { children: React.ReactNode }
         .join("")
         .slice(0, 2)
         .toUpperCase()
-    : session.user.email?.[0]?.toUpperCase() ?? "U";
+    : (session.user.email?.[0]?.toUpperCase() ?? "U");
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="container flex h-14 items-center justify-between px-6">
           <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="flex items-center gap-2 font-bold">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 font-bold"
+            >
               <BookOpen className="h-5 w-5" />
               Compendium
             </Link>
@@ -56,24 +63,36 @@ export async function DashboardShell({ children }: { children: React.ReactNode }
             </Link>
 
             <DropdownMenu>
-              <DropdownMenuTrigger
-                className="rounded-full ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
+              <DropdownMenuTrigger className="rounded-full ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                 <Avatar className="h-8 w-8">
                   {session.user.image && (
-                    <AvatarImage src={session.user.image} alt={session.user.name ?? ""} />
+                    <AvatarImage
+                      src={session.user.image}
+                      alt={session.user.name ?? ""}
+                    />
                   )}
-                  <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
+                  <AvatarFallback className="text-xs font-medium">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-2 py-1.5">
-                  <p className="text-sm font-medium">{session.user.name ?? "User"}</p>
-                  <p className="text-xs text-muted-foreground">{session.user.email}</p>
+                  <p className="text-sm font-medium">
+                    {session.user.name ?? "User"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {session.user.email}
+                  </p>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  render={<Link href="/dashboard/settings" className="flex items-center" />}
+                  render={
+                    <Link
+                      href="/dashboard/settings"
+                      className="flex items-center"
+                    />
+                  }
                 >
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
