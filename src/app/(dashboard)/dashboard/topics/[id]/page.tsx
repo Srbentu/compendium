@@ -18,14 +18,8 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { revalidatePath } from "next/cache";
-import { ArrowLeft, Pause, Play, Trash2, X, Rss, Newspaper, MessageCircle, Tv, Sparkles, Plus } from "lucide-react";
-
-const sourceIcons: Record<string, React.ReactNode> = {
-  rss: <Rss className="h-4 w-4" />,
-  newsapi: <Newspaper className="h-4 w-4" />,
-  reddit: <MessageCircle className="h-4 w-4" />,
-  youtube: <Tv className="h-4 w-4" />,
-};
+import { ArrowLeft, Pause, Play, Trash2, X, Plus, Sparkles } from "lucide-react";
+import { AutoSources } from "@/components/auto-sources";
 
 interface TopicDetailPageProps {
   params: Promise<{ id: string }>;
@@ -55,6 +49,13 @@ export default async function TopicDetailPage({ params }: TopicDetailPageProps) 
   const topicSources = await getTopicSources(topic.id);
   const autoSources = topicSources.filter((s) => s.isAuto);
   const manualSources = topicSources.filter((s) => !s.isAuto);
+
+  const sourceIcons: Record<string, React.ReactNode> = {
+    rss: "📰",
+    newsapi: "🗞️",
+    reddit: "💬",
+    youtube: "📺",
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -136,53 +137,8 @@ export default async function TopicDetailPage({ params }: TopicDetailPageProps) 
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="h-5 w-5 text-primary" />
             <h3 className="text-lg font-semibold">AI Sources</h3>
-            <Badge variant="secondary" className="text-xs">
-              {autoSources.length} found
-            </Badge>
           </div>
-
-          {autoSources.length === 0 ? (
-            <Card className="border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-8 text-center">
-                <Sparkles className="h-8 w-8 text-muted-foreground/50 mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  AI is still finding sources, or none were suggested yet.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-2">
-              {autoSources.map((source) => (
-                <Card key={source.id}>
-                  <CardContent className="flex items-center justify-between py-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-muted-foreground">
-                        {sourceIcons[source.type] ?? source.type}
-                      </span>
-                      <Badge variant="secondary" className="font-mono text-xs uppercase shrink-0">
-                        {source.type}
-                      </Badge>
-                      <span className="text-sm truncate">{source.url}</span>
-                      {source.label && (
-                        <span className="text-xs text-muted-foreground shrink-0">({source.label})</span>
-                      )}
-                    </div>
-                    <form
-                      action={async () => {
-                        "use server";
-                        await deleteSource(topic.id, source.id);
-                        revalidatePath(`/dashboard/topics/${id}`);
-                      }}
-                    >
-                      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" type="submit">
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+          <AutoSources topicId={topic.id} initialSources={autoSources} />
         </div>
 
         {/* Manual Sources */}
@@ -199,9 +155,7 @@ export default async function TopicDetailPage({ params }: TopicDetailPageProps) 
                 <Card key={source.id}>
                   <CardContent className="flex items-center justify-between py-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-muted-foreground">
-                        {sourceIcons[source.type] ?? source.type}
-                      </span>
+                      <span className="text-lg">{sourceIcons[source.type] ?? "🔗"}</span>
                       <Badge variant="secondary" className="font-mono text-xs uppercase shrink-0">
                         {source.type}
                       </Badge>

@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { createTopicWithSources } from "@/actions/create-topic";
+import { createTopicAction } from "@/actions/create-topic";
 import { ArrowLeft } from "lucide-react";
 
 export default async function NewTopicPage() {
@@ -42,7 +42,7 @@ export default async function NewTopicPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={createTopicWithSources} className="space-y-6">
+            <form action={createTopicAction} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
                 <Input
@@ -116,7 +116,7 @@ export default async function NewTopicPage() {
                 <Link href="/dashboard" className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
                   Cancel
                 </Link>
-                <Button type="submit">Create Topic & Find Sources</Button>
+                <Button type="submit">Create Topic</Button>
               </div>
             </form>
           </CardContent>
